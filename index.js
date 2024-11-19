@@ -1,11 +1,10 @@
-
-const { app } = require('firebase-admin');
 const functions = require('firebase-functions');
 admin = require('firebase-admin');
 express = require('express');
 cors = require('cors');
-app = express();
+const app = express();
 app.use(cors({ origin: true }));
+require('dotenv').config();
 
 const serviceAccount = {
     type: process.env.TYPE,
