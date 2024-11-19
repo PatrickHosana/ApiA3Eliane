@@ -6,6 +6,8 @@ const app = express();
 app.use(cors({ origin: true }));
 require('dotenv').config();
 
+app.use(express.json());
+
 const serviceAccount = {
     type: process.env.TYPE,
     project_id: process.env.PROJECT_ID,
