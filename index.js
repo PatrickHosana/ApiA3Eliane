@@ -32,7 +32,7 @@ const db = admin.firestore();
 app.post('/api/create/users', (req, res) => {
     (async () => {
     try {
-    await db.collection('users').doc('/' + req.params.user_id + '/')
+    await db.collection('users').doc('/' + req.body.user_id + '/')
     .create({   user_bio: req.body.user_bio,
                 user_date:req.body.user_date,
                 user_email:req.body.user_email,
