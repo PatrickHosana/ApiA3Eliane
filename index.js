@@ -1,4 +1,5 @@
 
+const { app } = require('firebase-admin');
 const functions = require('firebase-functions');
 admin = require('firebase-admin');
 express = require('express');
@@ -253,4 +254,4 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
     });
 
 
-    exports.app = functions.https.onRequest(app);
+    app.listen(3030,()=>console.log("Server Rodando"));
