@@ -42,6 +42,7 @@ app.post('/api/create/users', (req, res) => {
                 user_loc:req.body.user_loc,
                 user_nome:req.body.user_nome,
                 user_senha:req.body.user_senha,
+                user_function:req.body.user_function,
             });
     return res.status(200).send();
     } catch (error) {
@@ -85,7 +86,8 @@ app.post('/api/create/users', (req, res) => {
     user_img:doc.data().user_img,
     user_loc:doc.data().user_loc,
     user_nome:doc.data().user_nome,
-    user_senha:doc.data().user_senha
+    user_senha:doc.data().user_senha,
+    user_function:doc.data().user_function
     };
     response.push(selectedItem);
     }
@@ -112,7 +114,8 @@ app.put('/api/update/users/:user_id', (req, res) => {
         user_img:req.body.user_img,
         user_loc:req.body.user_loc,
         user_nome:req.body.user_nome,
-        user_senha:req.body.user_senha
+        user_senha:req.body.user_senha,
+        user_function:req.body.user_function,
     });
     return res.status(200).send();
     } catch (error) {
