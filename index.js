@@ -6,7 +6,6 @@ cors = require('cors');
 app = express();
 app.use(cors({ origin: true }));
 
-
 var serviceAccount = require("./ChaveAcesso.json");
 admin.initializeApp({
 credential: admin.credential.cert(serviceAccount),
@@ -241,4 +240,4 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
     });
 
 
-app.listen(3030,()=>console.log("Servidor Rodando"));
+    exports.app = functions.https.onRequest(app);
