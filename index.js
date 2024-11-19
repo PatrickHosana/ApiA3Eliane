@@ -34,7 +34,7 @@ const db = admin.firestore();
 app.post('/api/create/users', (req, res) => {
     (async () => {
     try {
-    await db.collection('users').doc('/' + req.body.user_num + '/')
+    await db.collection('users').doc('/' + req.body.user_id + '/')
     .create({   user_bio: req.body.user_bio,
                 user_date:req.body.user_date,
                 user_email:req.body.user_email,
@@ -54,10 +54,10 @@ app.post('/api/create/users', (req, res) => {
     });
 
     // Ler usuario especifico
-    app.get('/api/readitem/users/:user_num', (req, res) => {
+    app.get('/api/readitem/users/:user_id', (req, res) => {
     (async () => {
     try {
-    const document = db.collection('users').doc(req.params.user_num);
+    const document = db.collection('users').doc(req.params.user_id);
     let item = await document.get();
     let response = item.data();
     return res.status(200).send(response);
@@ -78,7 +78,7 @@ app.post('/api/create/users', (req, res) => {
     let docs = querySnapshot.docs;
     for (let doc of docs) {
     const selectedItem = {
-    user_num: doc.user_num,
+    user_id: doc.user_id,
     user_bio: doc.data().user_bio,
     user_date:doc.data().user_date,
     user_email:doc.data().user_email,
@@ -101,10 +101,10 @@ app.post('/api/create/users', (req, res) => {
     });
 
     // update
-app.put('/api/update/users/:user_num', (req, res) => {
+app.put('/api/update/users/:user_id', (req, res) => {
     (async () => {
     try {
-    const document = db.collection('users').doc(req.params.user_num);
+    const document = db.collection('users').doc(req.params.user_id);
     await document.update({
         user_bio: req.body.user_bio,
         user_date:req.body.user_date,
@@ -125,10 +125,10 @@ app.put('/api/update/users/:user_num', (req, res) => {
     });
 
     // delete usuarios
-app.delete('/api/delete/users/:user_num', (req, res) => {
+app.delete('/api/delete/users/:user_id', (req, res) => {
     (async () => {
     try {
-    const document = db.collection('users').doc(req.params.user_num);
+    const document = db.collection('users').doc(req.params.user_id);
     await document.delete();
     return res.status(200).send();
     } catch (error) {
@@ -156,7 +156,7 @@ app.post('/api/create/posts', (req, res) => {
 // preenchidos automaticamente
         post_date:req.body.post_date,
         post_likes:req.body.post_likes,
-        user_num:req.body.user_num
+        user_id:req.body.user_id
             });
     return res.status(200).send();
     } catch (error) {
@@ -203,7 +203,7 @@ app.post('/api/create/posts', (req, res) => {
     post_likes:doc.data().post_likes,
     quantidade_porcao:doc.data().quantidade_porcao,
     tempo_preparo:doc.data().tempo_preparo,
-    user_num:doc.data().user_num
+    user_id:doc.data().user_id
     };
     response.push(selectedItem);
     }
