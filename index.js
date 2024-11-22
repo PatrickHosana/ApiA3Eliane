@@ -43,8 +43,7 @@ const validatePostData = (data) => {
 app.post('/api/create/posts', (req, res) => {
     (async () => {
         try {
-            // Exibe os dados recebidos na requisição para ajudar a debugar
-            console.log("Dados recebidos:", req.body);
+            console.log("Dados recebidos:", req.body); // Log completo dos dados recebidos
 
             const validationError = validatePostData(req.body);
             if (validationError) {
@@ -62,14 +61,14 @@ app.post('/api/create/posts', (req, res) => {
                     tempo_preparo: req.body.tempo_preparo,
                 });
 
-            return res.status(200).send({ message: 'Post criado com sucesso!' });
+            return res.status(200).send();
         } catch (error) {
-            // Loga o erro completo para análise
-            console.error("Erro na criação do post:", error);
-            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
+            console.log("Erro no servidor:", error); // Log do erro
+            return res.status(500).send(error);
         }
     })();
 });
+
 
 // Atualizar post
 app.put('/api/update/posts/:post_id', (req, res) => {
