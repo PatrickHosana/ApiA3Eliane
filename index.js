@@ -152,10 +152,7 @@ app.post('/api/create/posts', (req, res) => {
         nome_ingredientes:req.body.nome_ingredientes,
         quantidade_porcao:req.body.quantidade_porcao,
         tempo_preparo:req.body.tempo_preparo,
-// preenchidos automaticamente
-        post_date:req.body.post_date,
-        post_likes:req.body.post_likes,
-        user_id:req.body.user_id
+
             });
     return res.status(200).send();
     } catch (error) {
@@ -196,12 +193,8 @@ app.post('/api/create/posts', (req, res) => {
     nivel_dificuldade:doc.data().nivel_dificuldade,
     nome_ingredientes:doc.data().nome_ingredientes,
     nome_prato:doc.data().nome_prato,
-    post_comments:doc.data().post_comments,
-    post_date:doc.data().post_date,
-    post_likes:doc.data().post_likes,
     quantidade_porcao:doc.data().quantidade_porcao,
     tempo_preparo:doc.data().tempo_preparo,
-    user_id:doc.data().user_id
     };
     response.push(selectedItem);
     }
