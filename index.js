@@ -147,7 +147,6 @@ app.post('/api/create/posts', (req, res) => {
 // preenchidos pelo usuário
         nome_prato:req.body.nome_prato,
         genero_prato: req.body.genero_prato,
-        img_prato:req.body.img_prato,
         mode_preparo:req.body.mode_preparo,
         nivel_dificuldade:req.body.nivel_dificuldade,
         nome_ingredientes:req.body.nome_ingredientes,
@@ -193,7 +192,6 @@ app.post('/api/create/posts', (req, res) => {
     const selectedItem = {
     post_id: doc.post_id,
     genero_prato: doc.data().genero_prato,
-    img_prato:doc.data().img_prato,
     mode_preparo:doc.data().mode_preparo,
     nivel_dificuldade:doc.data().nivel_dificuldade,
     nome_ingredientes:doc.data().nome_ingredientes,
@@ -225,7 +223,6 @@ app.put('/api/update/posts/:post_id', (req, res) => {
         // preenchidos pelo usuário
         nome_prato:req.body.nome_prato,
         genero_prato: req.body.genero_prato,
-        img_prato:req.body.img_prato,
         mode_preparo:req.body.mode_preparo,
         nivel_dificuldade:req.body.nivel_dificuldade,
         nome_ingredientes:req.body.nome_ingredientes,
