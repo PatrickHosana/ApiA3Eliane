@@ -28,7 +28,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// Verifique se os dados estão corretos antes de inserir
+// Função para validar os dados antes de criar o post
 const validatePostData = (data) => {
     const requiredFields = ['nome_prato', 'genero_prato', 'mode_preparo', 'nivel_dificuldade', 'nome_ingredientes', 'quantidade_porcao', 'tempo_preparo'];
     for (const field of requiredFields) {
@@ -43,6 +43,9 @@ const validatePostData = (data) => {
 app.post('/api/create/posts', (req, res) => {
     (async () => {
         try {
+            // Exibe os dados recebidos na requisição para ajudar a debugar
+            console.log("Dados recebidos:", req.body);
+
             const validationError = validatePostData(req.body);
             if (validationError) {
                 return res.status(400).send({ error: validationError });
@@ -59,10 +62,11 @@ app.post('/api/create/posts', (req, res) => {
                     tempo_preparo: req.body.tempo_preparo,
                 });
 
-            return res.status(200).send();
+            return res.status(200).send({ message: 'Post criado com sucesso!' });
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
+            // Loga o erro completo para análise
+            console.error("Erro na criação do post:", error);
+            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
         }
     })();
 });
@@ -87,25 +91,28 @@ app.put('/api/update/posts/:post_id', (req, res) => {
                 tempo_preparo: req.body.tempo_preparo,
             });
 
-            return res.status(200).send();
+            return res.status(200).send({ message: 'Post atualizado com sucesso!' });
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
+            console.error("Erro na atualização do post:", error);
+            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
         }
     })();
 });
 
-// Ler post especifico
+// Ler post específico
 app.get('/api/readitem/posts/:post_id', (req, res) => {
     (async () => {
         try {
             const document = db.collection('posts').doc(req.params.post_id);
             let item = await document.get();
+            if (!item.exists) {
+                return res.status(404).send({ error: 'Post não encontrado.' });
+            }
             let response = item.data();
             return res.status(200).send(response);
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
+            console.error("Erro ao ler o post:", error);
+            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
         }
     })();
 });
@@ -134,22 +141,22 @@ app.get('/api/readall/posts', (req, res) => {
             });
             return res.status(200).send(response);
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
+            console.error("Erro ao ler os posts:", error);
+            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
         }
     })();
 });
 
-// Delete post
+// Deletar post
 app.delete('/api/delete/posts/:post_id', (req, res) => {
     (async () => {
         try {
             const document = db.collection('posts').doc(req.params.post_id);
             await document.delete();
-            return res.status(200).send();
+            return res.status(200).send({ message: 'Post deletado com sucesso!' });
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
+            console.error("Erro ao deletar o post:", error);
+            return res.status(500).send({ error: 'Erro interno no servidor', details: error.message });
         }
     })();
 });
