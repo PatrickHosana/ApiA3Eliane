@@ -60,8 +60,7 @@ app.post('/api/create/posts', (req, res) => {
                     quantidade_porcao: req.body.quantidade_porcao,
                     tempo_preparo: req.body.tempo_preparo,
                 });
-
-            return res.status(200).send();
+                return res.status(200).send({ message: "Post criado com sucesso", post_id: req.body.post_id });
         } catch (error) {
             console.log("Erro no servidor:", error); // Log do erro
             return res.status(500).send(error);
