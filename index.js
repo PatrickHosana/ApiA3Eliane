@@ -120,7 +120,7 @@ app.get('/api/readall/posts', (req, res) => {
                 let docs = querySnapshot.docs;
                 for (let doc of docs) {
                     const selectedItem = {
-                        post_id: doc.post_id,
+                        post_id: doc.data().post_id,
                         genero_prato: doc.data().genero_prato,
                         mode_preparo: doc.data().mode_preparo,
                         nivel_dificuldade: doc.data().nivel_dificuldade,
