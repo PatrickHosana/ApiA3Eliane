@@ -43,13 +43,13 @@ const validatePostData = (data) => {
 app.post('/api/create/posts', (req, res) => {
     (async () => {
         try {
-            console.log("Dados recebidos:", req.body); // Log completo dos dados recebidos
-
+            // Valida os dados enviados no corpo da requisição
             const validationError = validatePostData(req.body);
             if (validationError) {
+                console.error(`Erro de validação: ${validationError}`);
                 return res.status(400).send({ error: validationError });
             }
-
+            // Criação do post no Firestore
             await db.collection('posts').doc('/' + req.body.post_id + '/')
                 .create({
                     nome_prato: req.body.nome_prato,
@@ -60,14 +60,15 @@ app.post('/api/create/posts', (req, res) => {
                     quantidade_porcao: req.body.quantidade_porcao,
                     tempo_preparo: req.body.tempo_preparo,
                 });
-                return res.status(200).send({ message: "Post criado com sucesso", post_id: req.body.post_id });
+
+            console.log(`Post criado com sucesso: ${req.body.post_id}`);
+            return res.status(200).send({ message: "Post criado com sucesso", post_id: req.body.post_id });
         } catch (error) {
-            console.log("Erro no servidor:", error); // Log do erro
-            return res.status(500).send(error);
+            console.error("Erro inesperado:", error);
+            return res.status(500).send({ error: "Erro ao processar a requisição. Tente novamente mais tarde." });
         }
     })();
 });
-
 
 // Atualizar post
 app.put('/api/update/posts/:post_id', (req, res) => {
