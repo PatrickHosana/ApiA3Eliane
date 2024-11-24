@@ -150,6 +150,8 @@ app.post('/api/create/posts', (req, res) => {
                 'nome_ingredientes',
                 'quantidade_porcao',
                 'tempo_preparo',
+                'img_post',
+
             ];
 
             // Verificar se algum campo obrigatório está ausente
@@ -169,6 +171,7 @@ app.post('/api/create/posts', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
+                img_post: req.body.post_img,
             });
 
             return res.status(200).json({ message: 'Post criado com sucesso!' });
@@ -212,6 +215,7 @@ app.get('/api/readall/posts', (req, res) => {
                         nome_prato: doc.data().nome_prato,
                         quantidade_porcao: doc.data().quantidade_porcao,
                         tempo_preparo: doc.data().tempo_preparo,
+                        img_post: doc.data().post_img,
                     };
                     response.push(selectedItem);
                 }
@@ -237,6 +241,7 @@ app.put('/api/update/posts/:post_id', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
+                img_post: req.body.post_img,
             });
             return res.status(200).send();
         } catch (error) {
