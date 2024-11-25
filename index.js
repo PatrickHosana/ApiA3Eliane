@@ -226,7 +226,7 @@ app.put('/api/update/posts/:post_id', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
-                img_post: req.body.post_img,
+                img_post: req.body.img_post,
             });
             return res.status(200).send();
         } catch (error) {
