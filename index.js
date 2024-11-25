@@ -150,20 +150,16 @@ app.post('/api/create/posts', (req, res) => {
                 'nome_ingredientes',
                 'quantidade_porcao',
                 'tempo_preparo',
-                'img_post',
-
             ];
 
-            // Verificar se algum campo obrigatório está ausente
             for (const field of requiredFields) {
                 if (!req.body[field]) {
-                    console.error(`Erro de validação: Campo obrigatório '${field}' não foi fornecido.`);
                     return res.status(400).json({ error: `Campo obrigatório '${field}' não foi fornecido.` });
                 }
             }
 
-            // Criação do post no Firestore
-            await db.collection('posts').doc('/' + req.body.post_id + '/').create({
+            // Verificação para campos opcionais
+            const data = {
                 nome_prato: req.body.nome_prato,
                 genero_prato: req.body.genero_prato,
                 mode_preparo: req.body.mode_preparo,
@@ -171,8 +167,11 @@ app.post('/api/create/posts', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
-                img_post: req.body.post_img,
-            });
+                img_post: req.body.img_post || null, // Define como null se não for fornecido
+            };
+
+            // Criar documento no Firestore
+            await db.collection('posts').doc('/' + req.body.post_id + '/').create(data);
 
             return res.status(200).json({ message: 'Post criado com sucesso!' });
         } catch (error) {
@@ -181,6 +180,7 @@ app.post('/api/create/posts', (req, res) => {
         }
     })();
 });
+
 
 // Ler post especifico
 app.get('/api/readitem/posts/:post_id', (req, res) => {
