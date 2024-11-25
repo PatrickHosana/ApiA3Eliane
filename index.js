@@ -34,13 +34,8 @@ app.post('/api/create/users', (req, res) => {
         try {
             await db.collection('users').doc('/' + req.body.user_id + '/')
                 .create({
-                    user_bio: req.body.user_bio,
-                    user_date: req.body.user_date,
                     user_email: req.body.user_email,
-                    user_fav: req.body.user_fav,
-                    user_genero: req.body.user_genero,
                     user_img: req.body.user_img,
-                    user_loc: req.body.user_loc,
                     user_nome: req.body.user_nome,
                     user_senha: req.body.user_senha,
                 });
@@ -78,13 +73,8 @@ app.get('/api/readall/users', (req, res) => {
                 for (let doc of docs) {
                     const selectedItem = {
                         user_id: doc.user_id,
-                        user_bio: doc.data().user_bio,
-                        user_date: doc.data().user_date,
                         user_email: doc.data().user_email,
-                        user_fav: doc.data().user_fav,
-                        user_genero: doc.data().user_genero,
                         user_img: doc.data().user_img,
-                        user_loc: doc.data().user_loc,
                         user_nome: doc.data().user_nome,
                         user_senha: doc.data().user_senha,
                     };
@@ -105,13 +95,8 @@ app.put('/api/update/users/:user_id', (req, res) => {
         try {
             const document = db.collection('users').doc(req.params.user_id);
             await document.update({
-                user_bio: req.body.user_bio,
-                user_date: req.body.user_date,
                 user_email: req.body.user_email,
-                user_fav: req.body.user_fav,
-                user_genero: req.body.user_genero,
                 user_img: req.body.user_img,
-                user_loc: req.body.user_loc,
                 user_nome: req.body.user_nome,
                 user_senha: req.body.user_senha,
             });
