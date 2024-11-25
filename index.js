@@ -198,9 +198,9 @@ app.get('/api/readall/posts', (req, res) => {
                         nivel_dificuldade: doc.data().nivel_dificuldade,
                         nome_ingredientes: doc.data().nome_ingredientes,
                         nome_prato: doc.data().nome_prato,
-                        quantidade_porcao: doc.data().quantidade_porcao,
+                        quantidade_porcao:g doc.data().quantidade_porcao,
                         tempo_preparo: doc.data().tempo_preparo,
-                        img_post: doc.data().post_img,
+                        img_post: doc.data().img_post,
                     };
                     response.push(selectedItem);
                 }
