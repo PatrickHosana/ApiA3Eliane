@@ -103,18 +103,38 @@ app.post('/api/create/users', async (req, res) => {
     }
 
     try {
+        // Verificar se o usuário já está registrado no Firebase Authentication
+        try {
+            const existingUser = await admin.auth().getUserByEmail(user_email);
+            console.log('Usuário já registrado no Firebase Authentication:', existingUser.uid);
+        } catch (error) {
+            if (error.code === 'auth/user-not-found') {
+                // Se o usuário não foi encontrado, crie um novo usuário no Firebase Authentication
+                const newUser = await admin.auth().createUser({
+                    email: user_email,
+                    password: user_senha, // Defina uma senha segura ou gere uma se necessário
+                });
+                console.log('Usuário criado no Firebase Authentication:', newUser.uid);
+            } else {
+                // Se outro erro ocorrer
+                console.error('Erro ao verificar/criar usuário no Firebase Authentication:', error);
+                return res.status(500).json({ message: 'Erro ao verificar/criar usuário no Firebase Authentication', error: error.message });
+            }
+        }
+
+        // Criptografar a senha e armazenar no Firestore
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(user_senha, salt);
 
-        const newUser = {
+        const newUserFirestore = {
             user_email,
             user_nome,
             user_senha: hashedPassword,
             user_img: user_img || null,
         };
 
-        const docRef = await db.collection('users').add(newUser);
-        console.log('Usuário criado com sucesso');
+        const docRef = await db.collection('users').add(newUserFirestore);
+        console.log('Usuário criado no Firestore com sucesso');
         return res.status(201).json({ message: 'Usuário criado com sucesso', user_id: docRef.id });
     } catch (error) {
         console.error('Erro ao criar usuário:', error);
@@ -370,6 +390,7 @@ app.post('/api/forgot-password', async (req, res) => {
         return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
     }
 });
+
 
 
 // Iniciar o servidor
