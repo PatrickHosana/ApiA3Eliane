@@ -34,6 +34,29 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+// Função para redefinir a senha do usuário
+const resetPassword = async (user_email, new_password) => {
+    try {
+        // Buscar o usuário pelo e-mail no Firebase Authentication
+        const userRecord = await admin.auth().getUserByEmail(user_email);
+
+        if (!userRecord) {
+            throw new Error('Usuário não encontrado.');
+        }
+
+        // Atualizar a senha do usuário
+        await admin.auth().updateUser(userRecord.uid, {
+            password: new_password,  // Nova senha
+        });
+
+        console.log(`Senha do usuário ${user_email} atualizada com sucesso!`);
+        return { message: 'Senha atualizada com sucesso!' };
+    } catch (error) {
+        console.error('Erro ao atualizar a senha:', error);
+        return { error: 'Erro ao atualizar a senha', details: error.message };
+    }
+};
+
 // Middleware para verificar o token JWT
 function authenticateToken(req, res, next) {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -360,6 +383,7 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
             return res.status(500).json({ message: 'Erro ao redefinir senha.', error: error.message });
         }
     });
+    
 
 // Iniciar o servidor
 app.listen(3030, () => console.log("Servidor rodando na porta 3030"));
