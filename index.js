@@ -343,7 +343,7 @@ const nodemailer = require('nodemailer');
 
 // Configuração do transporte de e-mail (usando seu serviço de e-mail)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',  // Ou o serviço que você estiver usando
+    service: 'hotmail',  // Ou o serviço que você estiver usando
     auth: {
         user: process.env.EMAIL_USER, // E-mail que enviará a mensagem
         pass: process.env.EMAIL_PASS, // Senha do e-mail
