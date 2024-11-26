@@ -44,9 +44,18 @@ const resetPassword = async (user_email, new_password) => {
             throw new Error('Usuário não encontrado.');
         }
 
-        // Atualizar a senha do usuário
+        // Criptografar a nova senha antes de armazenar
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(new_password, salt);
+
+        // Atualizar a senha do usuário no Firestore
         await admin.auth().updateUser(userRecord.uid, {
-            password: new_password,  // Nova senha
+            password: new_password,  // Nova senha, em texto simples, no Firebase Authentication
+        });
+
+        // Atualizar a senha também no Firestore com a senha criptografada
+        await db.collection('users').doc(userRecord.uid).update({
+            user_senha: hashedPassword, // Atualizando a senha criptografada no Firestore
         });
 
         console.log(`Senha do usuário ${user_email} atualizada com sucesso!`);
