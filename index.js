@@ -36,7 +36,7 @@ const db = admin.firestore();
 
 // Middleware para verificar o token JWT
 function authenticateToken(req, res, next) {
-    const token = req.headers['authorization']?.split(' ')[1]; // Ex: "Bearer <token>"
+    const token = req.headers[npm install nodemailer'authorization']?.split(' ')[1]; // Ex: "Bearer <token>"
 
     if (!token) {
         return res.status(401).json({ message: 'Token não fornecido' });
