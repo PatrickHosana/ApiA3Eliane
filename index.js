@@ -52,8 +52,8 @@ app.post('/api/create/users', async (req, res) => {
     try {
         // Criptografa a senha antes de salvar no Firestore
         const hashedPassword = await bcrypt.hash(req.body.user_senha, 10);
+        console.log("Senha criptografada:", hashedPassword);  // Log para verificar a senha
 
-        // Agora armazena a senha criptografada no banco de dados
         await db.collection('users').doc('/' + req.body.user_id + '/').create({
             user_email: req.body.user_email,
             user_img: req.body.user_img,
@@ -93,6 +93,9 @@ app.post('/api/login', async (req, res) => {
 
         // Pega os dados do usuário
         const user = userDoc.docs[0].data();
+
+        // Log para ver a senha criptografada armazenada
+        console.log("Senha armazenada no banco:", user.user_senha);
 
         // Verifica se a senha fornecida corresponde à senha armazenada
         const isPasswordValid = await bcrypt.compare(user_senha, user.user_senha);
