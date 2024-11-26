@@ -341,7 +341,6 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
         }
     })();
 });
-const nodemailer = require('nodemailer');
 
 // Configuração do transporte de e-mail (usando seu serviço de e-mail)
 const transporter = nodemailer.createTransport(mailgun({
