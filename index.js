@@ -337,7 +337,7 @@ app.post('/api/forgot-password', async (req, res) => {
         // Gerar link de redefinição de senha
         const auth = admin.auth();
         const resetLink = await auth.generatePasswordResetLink(user_email);
-
+    
         // Configurar o e-mail de recuperação
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -349,15 +349,17 @@ app.post('/api/forgot-password', async (req, res) => {
                 <a href="${resetLink}">Redefinir senha</a>
             `,
         };
-
+    
         // Enviar o e-mail
         await transporter.sendMail(mailOptions);
-
+        console.log(`E-mail enviado para ${user_email}`); // Log para verificação
+    
         return res.status(200).json({ message: 'E-mail de recuperação de senha enviado com sucesso.' });
     } catch (error) {
         console.error('Erro ao enviar e-mail de recuperação de senha:', error);
         return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
     }
+    
 });
 
 
