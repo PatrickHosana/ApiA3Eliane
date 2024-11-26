@@ -5,6 +5,8 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const app = express();
+const nodemailer = require('nodemailer');
+const mailgun = require('nodemailer-mailgun-transport');
 app.use(cors({ origin: true }));
 require('dotenv').config();
 
@@ -342,13 +344,12 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
 const nodemailer = require('nodemailer');
 
 // Configuração do transporte de e-mail (usando seu serviço de e-mail)
-const transporter = nodemailer.createTransport({
-    service: 'hotmail',  // Ou o serviço que você estiver usando
+const transporter = nodemailer.createTransport(mailgun({
     auth: {
-        user: process.env.EMAIL_USER, // E-mail que enviará a mensagem
-        pass: process.env.EMAIL_PASS, // Senha do e-mail
-    },
-});
+        api_key: process.env.MAILGUN_API_KEY, // Sua chave de API do Mailgun
+        domain: process.env.MAILGUN_DOMAIN,   // O domínio associado à sua conta Mailgun
+    }
+}));
 
 app.post('/api/forgot-password', async (req, res) => {
     const { user_email } = req.body;
@@ -370,7 +371,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
         // Configurar o e-mail de recuperação
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `no-reply@${process.env.MAILGUN_DOMAIN}`, // E-mail de remetente (associado ao seu domínio do Mailgun)
             to: user_email,
             subject: 'Recuperação de Senha',
             html: `
