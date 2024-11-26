@@ -48,31 +48,43 @@ function authenticateToken(req, res, next) {
 }
 
 // Criar Usuários
-app.post('/api/create/users', async (req, res) => {
+app.post('/api/login', async (req, res) => {
+    const { user_email, user_senha } = req.body;
+
+    if (!user_email || !user_senha) {
+        console.log('Erro: Email ou senha não fornecidos');
+        return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+    }
+
     try {
-        // Criptografa a senha antes de salvar no Firestore
-        const hashedPassword = await bcrypt.hash(req.body.user_senha, 10);
-        console.log("Senha criptografada:", hashedPassword);  // Log para verificar a senha
+        console.log('Iniciando busca por usuário no Firestore...');
+        const userDoc = await db.collection('users').where('user_email', '==', user_email).limit(1).get();
+        
+        if (userDoc.empty) {
+            console.log('Erro: Usuário não encontrado');
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
 
-        await db.collection('users').doc('/' + req.body.user_id + '/').create({
-            user_email: req.body.user_email,
-            user_img: req.body.user_img,
-            user_nome: req.body.user_nome,
-            user_senha: hashedPassword,  // Senha criptografada
-        });
+        const user = userDoc.docs[0].data();
+        console.log('Usuário encontrado: ', user);
 
-        return res.status(200).json({
-            message: 'Usuário criado com sucesso!',
-            user_id: req.body.user_id,
-        });
+        // Comparar a senha com a senha armazenada
+        const isPasswordValid = await bcrypt.compare(user_senha, user.user_senha);
+        if (!isPasswordValid) {
+            console.log('Erro: Senha inválida');
+            return res.status(401).json({ message: 'Senha inválida.' });
+        }
+
+        // Gerar token JWT
+        const token = jwt.sign({ user_email: user_email, user_id: userDoc.docs[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        console.log('Login bem-sucedido, token gerado');
+        return res.status(200).json({ message: 'Login bem-sucedido', token });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            error: 'Erro ao criar usuário',
-            details: error.message,
-        });
+        console.error('Erro ao tentar logar:', error);
+        return res.status(500).json({ message: 'Erro ao tentar conectar com o servidor.', error: error.message });
     }
 });
+
 
 // Login
 app.post('/api/login', async (req, res) => {
