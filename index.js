@@ -139,51 +139,41 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/create/users', async (req, res) => {
     const { user_email, user_nome, user_senha, user_img } = req.body;
 
+    // Verificação dos campos obrigatórios
     if (!user_email || !user_nome || !user_senha) {
         console.log('Campos obrigatórios não fornecidos');
         return res.status(400).json({ message: 'Campos obrigatórios não fornecidos.' });
     }
 
     try {
-        // Verificar se o usuário já está registrado no Firebase Authentication
-        let user;
-        try {
-            user = await admin.auth().getUserByEmail(user_email);
-            console.log('Usuário já registrado no Firebase Authentication:', user.uid);
-        } catch (error) {
-            if (error.code === 'auth/user-not-found') {
-                // Criar um novo usuário no Firebase Authentication
-                user = await admin.auth().createUser({
-                    email: user_email,
-                    password: user_senha,
-                    displayName: user_nome,
-                });
-                console.log('Usuário criado no Firebase Authentication:', user.uid);
-            } else {
-                console.error('Erro ao verificar/criar usuário no Firebase Authentication:', error);
-                return res.status(500).json({ message: 'Erro ao verificar/criar usuário no Firebase Authentication', error: error.message });
-            }
-        }
-
-        // Criptografar a senha para armazenar no Firestore
+        // Criptografar a senha antes de salvar no Firestore
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(user_senha, salt);
 
-        // Criar ou atualizar o usuário no Firestore
+        // Criar o usuário no Firebase Authentication
+        const user = await admin.auth().createUser({
+            email: user_email,
+            password: user_senha, // Senha não criptografada exigida pelo Firebase Authentication
+            displayName: user_nome,
+        });
+
+        // Criar o documento no Firestore com o mesmo UID
         await db.collection('users').doc(user.uid).set({
             user_nome,
             user_email,
             user_img: user_img || null,
-            user_senha: hashedPassword, // Senha criptografada
+            user_senha: hashedPassword, // Senha criptografada para o Firestore
         });
 
-        console.log('Usuário criado/atualizado no Firestore com sucesso');
+        console.log('Usuário criado com sucesso no Firebase Authentication e no Firestore');
         return res.status(201).json({ message: 'Usuário criado com sucesso', user_id: user.uid });
+
     } catch (error) {
         console.error('Erro ao criar usuário:', error);
         return res.status(500).json({ message: 'Erro ao criar usuário', error: error.message });
     }
 });
+
 
 // Ler usuário específico
 app.get('/api/readitem/users/:user_id', (req, res) => {
