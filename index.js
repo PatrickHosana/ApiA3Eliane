@@ -315,7 +315,17 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
         }
     })();
 });
-// Forgot Password
+const nodemailer = require('nodemailer');
+
+// Configuração do transporte de e-mail (usando seu serviço de e-mail)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',  // Ou o serviço que você estiver usando
+    auth: {
+        user: process.env.EMAIL_USER, // E-mail que enviará a mensagem
+        pass: process.env.EMAIL_PASS, // Senha do e-mail
+    },
+});
+
 app.post('/api/forgot-password', async (req, res) => {
     const { user_email } = req.body;
 
@@ -324,17 +334,32 @@ app.post('/api/forgot-password', async (req, res) => {
     }
 
     try {
-        // Enviar e-mail de recuperação de senha usando o Firebase Auth
+        // Gerar link de redefinição de senha
         const auth = admin.auth();
-        await auth.generatePasswordResetLink(user_email);
+        const resetLink = await auth.generatePasswordResetLink(user_email);
 
-        // Informar ao usuário que o e-mail de recuperação foi enviado
+        // Configurar o e-mail de recuperação
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user_email,
+            subject: 'Recuperação de Senha',
+            html: `
+                <h1>Redefinição de Senha</h1>
+                <p>Olá, clique no link abaixo para redefinir sua senha:</p>
+                <a href="${resetLink}">Redefinir senha</a>
+            `,
+        };
+
+        // Enviar o e-mail
+        await transporter.sendMail(mailOptions);
+
         return res.status(200).json({ message: 'E-mail de recuperação de senha enviado com sucesso.' });
     } catch (error) {
         console.error('Erro ao enviar e-mail de recuperação de senha:', error);
         return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
     }
 });
+
 
 
 // Iniciar o servidor
