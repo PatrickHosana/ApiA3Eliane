@@ -23,10 +23,14 @@ const serviceAccount = {
     client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
 };
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: `https://${process.env.PROJECT_ID}.firebaseio.com`,
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: `https://${process.env.PROJECT_ID}.firebaseio.com`,
+    });
+} else {
+    console.log('Firebase já foi inicializado');
+}
 
 const db = admin.firestore();
 
