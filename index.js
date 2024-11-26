@@ -349,49 +349,26 @@ const transporter = nodemailer.createTransport(mailgun({
         domain: process.env.MAILGUN_DOMAIN,   // O domínio associado à sua conta Mailgun
     }
 }));
-
-app.post('/api/forgot-password', async (req, res) => {
-    const { user_email } = req.body;
-
-    if (!user_email) {
-        return res.status(400).json({ message: 'Email não fornecido.' });
-    }
-
-    try {
-        // Verifique se o e-mail está registrado no Firebase Authentication
-        const userRecord = await admin.auth().getUserByEmail(user_email);
-        
-        if (!userRecord) {
-            return res.status(404).json({ message: 'E-mail não registrado.' });
+    
+    // Rota para redefinir a senha (qualquer usuário pode chamar)
+    app.post('/api/reset-password', async (req, res) => {
+        const { user_email, new_password } = req.body;
+    
+        // Verifique se o e-mail e a nova senha foram fornecidos
+        if (!user_email || !new_password) {
+            return res.status(400).json({ message: 'E-mail e nova senha são obrigatórios.' });
         }
-
-        // Gerar link de redefinição de senha
-        const resetLink = await admin.auth().generatePasswordResetLink(user_email);
-
-        // Configurar o e-mail de recuperação
-        const mailOptions = {
-            from: `no-reply@${process.env.MAILGUN_DOMAIN}`, // E-mail de remetente (associado ao seu domínio do Mailgun)
-            to: user_email,
-            subject: 'Recuperação de Senha',
-            html: `
-                <h1>Redefinição de Senha</h1>
-                <p>Olá, clique no link abaixo para redefinir sua senha:</p>
-                <a href="${resetLink}">Redefinir senha</a>
-            `,
-        };
-
-        // Enviar o e-mail
-        await transporter.sendMail(mailOptions);
-        console.log(`E-mail enviado para ${user_email}`);
-
-        return res.status(200).json({ message: 'E-mail de recuperação de senha enviado com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao enviar e-mail de recuperação de senha:', error);
-        return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
-    }
-});
-
-
+    
+        try {
+            // Chama a função de redefinir senha
+            const response = await resetPassword(user_email, new_password);
+    
+            // Retorne a resposta
+            return res.status(200).json(response);
+        } catch (error) {
+            return res.status(500).json({ message: 'Erro ao redefinir senha.', error: error.message });
+        }
+    });
 
 // Iniciar o servidor
-app.listen(3030, () => console.log("Server Rodando"));
+app.listen(3030, () => console.log("Servidor rodando na porta 3030"));
