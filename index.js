@@ -78,36 +78,32 @@ app.post('/api/create/users', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { user_email, user_senha } = req.body;
 
-    // Verifica se os campos de email e senha foram fornecidos
     if (!user_email || !user_senha) {
+        console.log('Email ou senha não fornecidos');
         return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
     }
 
     try {
-        // Busca o usuário no Firestore pelo email
+        console.log('Buscando usuário no Firestore');
         const userDoc = await db.collection('users').where('user_email', '==', user_email).limit(1).get();
 
         if (userDoc.empty) {
+            console.log('Usuário não encontrado');
             return res.status(404).json({ message: 'Usuário não encontrado.' });
         }
 
-        // Pega os dados do usuário
         const user = userDoc.docs[0].data();
+        console.log('Senha armazenada no banco:', user.user_senha);
 
-        // Log para ver a senha criptografada armazenada
-        console.log("Senha armazenada no banco:", user.user_senha);
-
-        // Verifica se a senha fornecida corresponde à senha armazenada
         const isPasswordValid = await bcrypt.compare(user_senha, user.user_senha);
 
         if (!isPasswordValid) {
+            console.log('Senha inválida');
             return res.status(401).json({ message: 'Senha inválida.' });
         }
 
-        // Gera o token JWT
         const token = jwt.sign({ user_email: user_email, user_id: userDoc.docs[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Retorna o token para o cliente
+        console.log('Login bem-sucedido, token gerado');
         return res.status(200).json({ message: 'Login bem-sucedido', token });
     } catch (error) {
         console.error('Erro ao tentar logar:', error);
