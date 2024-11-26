@@ -84,6 +84,7 @@ function authenticateToken(req, res, next) {
 }
 
 // Login
+// Login
 app.post('/api/login', async (req, res) => {
     const { user_email, user_senha } = req.body;
 
@@ -104,6 +105,7 @@ app.post('/api/login', async (req, res) => {
         const user = userDoc.docs[0].data();
         console.log('Senha armazenada no banco:', user.user_senha);
 
+        // Comparar a senha fornecida com a senha criptografada no banco de dados
         const isPasswordValid = await bcrypt.compare(user_senha, user.user_senha);
 
         if (!isPasswordValid) {
