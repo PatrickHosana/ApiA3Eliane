@@ -2,6 +2,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const app = express();
 app.use(cors({ origin: true }));
 require('dotenv').config();
@@ -28,17 +30,37 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// Criar Usuarios
+// Middleware para verificar o token JWT
+function authenticateToken(req, res, next) {
+    const token = req.headers['authorization']?.split(' ')[1]; // Ex: "Bearer <token>"
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token não fornecido' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token inválido' });
+        }
+        req.user = user; // Coloca os dados do usuário no req.user
+        next();
+    });
+}
+
+// Criar Usuários
 app.post('/api/create/users', async (req, res) => {
     try {
+        // Criptografa a senha antes de salvar no Firestore
+        const hashedPassword = await bcrypt.hash(req.body.user_senha, 10);
+
+        // Agora armazena a senha criptografada no banco de dados
         await db.collection('users').doc('/' + req.body.user_id + '/').create({
             user_email: req.body.user_email,
             user_img: req.body.user_img,
             user_nome: req.body.user_nome,
-            user_senha: req.body.user_senha,
+            user_senha: hashedPassword,  // Senha criptografada
         });
 
-        // Retorna um JSON de confirmação
         return res.status(200).json({
             message: 'Usuário criado com sucesso!',
             user_id: req.body.user_id,
@@ -52,6 +74,43 @@ app.post('/api/create/users', async (req, res) => {
     }
 });
 
+// Login
+app.post('/api/login', async (req, res) => {
+    const { user_email, user_senha } = req.body;
+
+    // Verifica se os campos de email e senha foram fornecidos
+    if (!user_email || !user_senha) {
+        return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+    }
+
+    try {
+        // Busca o usuário no Firestore pelo email
+        const userDoc = await db.collection('users').where('user_email', '==', user_email).limit(1).get();
+
+        if (userDoc.empty) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        // Pega os dados do usuário
+        const user = userDoc.docs[0].data();
+
+        // Verifica se a senha fornecida corresponde à senha armazenada
+        const isPasswordValid = await bcrypt.compare(user_senha, user.user_senha);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Senha inválida.' });
+        }
+
+        // Gera o token JWT
+        const token = jwt.sign({ user_email: user_email, user_id: userDoc.docs[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Retorna o token para o cliente
+        return res.status(200).json({ message: 'Login bem-sucedido', token });
+    } catch (error) {
+        console.error('Erro ao tentar logar:', error);
+        return res.status(500).json({ message: 'Erro ao tentar conectar com o servidor.', error: error.message });
+    }
+});
 
 // Ler usuario especifico
 app.get('/api/readitem/users/:user_id', (req, res) => {
@@ -128,11 +187,10 @@ app.delete('/api/delete/users/:user_id', (req, res) => {
     })();
 });
 
-// Criar Posts
+// Criar Post
 app.post('/api/create/posts', (req, res) => {
     (async () => {
         try {
-            // Validação de campos obrigatórios
             const requiredFields = [
                 'nome_prato',
                 'genero_prato',
@@ -149,7 +207,6 @@ app.post('/api/create/posts', (req, res) => {
                 }
             }
 
-            // Verificação para campos opcionais
             const data = {
                 nome_prato: req.body.nome_prato,
                 genero_prato: req.body.genero_prato,
@@ -158,10 +215,9 @@ app.post('/api/create/posts', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
-                img_post: req.body.img_post || null, // Define como null se não for fornecido
+                img_post: req.body.img_post || null,
             };
 
-            // Criar documento no Firestore
             await db.collection('posts').doc('/' + req.body.post_id + '/').create(data);
 
             return res.status(200).json({ message: 'Post criado com sucesso!' });
@@ -171,7 +227,6 @@ app.post('/api/create/posts', (req, res) => {
         }
     })();
 });
-
 
 // Ler post especifico
 app.get('/api/readitem/posts/:post_id', (req, res) => {
