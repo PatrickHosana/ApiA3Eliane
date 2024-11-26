@@ -29,23 +29,29 @@ admin.initializeApp({
 const db = admin.firestore();
 
 // Criar Usuarios
-app.post('/api/create/users', (req, res) => {
-    (async () => {
-        try {
-            await db.collection('users').doc('/' + req.body.user_id + '/')
-                .create({
-                    user_email: req.body.user_email,
-                    user_img: req.body.user_img,
-                    user_nome: req.body.user_nome,
-                    user_senha: req.body.user_senha,
-                });
-            return res.status(200).send();
-        } catch (error) {
-            console.log(error);
-            return res.status(500).send(error);
-        }
-    })();
+app.post('/api/create/users', async (req, res) => {
+    try {
+        await db.collection('users').doc('/' + req.body.user_id + '/').create({
+            user_email: req.body.user_email,
+            user_img: req.body.user_img,
+            user_nome: req.body.user_nome,
+            user_senha: req.body.user_senha,
+        });
+
+        // Retorna um JSON de confirmação
+        return res.status(200).json({
+            message: 'Usuário criado com sucesso!',
+            user_id: req.body.user_id,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: 'Erro ao criar usuário',
+            details: error.message,
+        });
+    }
 });
+
 
 // Ler usuario especifico
 app.get('/api/readitem/users/:user_id', (req, res) => {
@@ -72,7 +78,7 @@ app.get('/api/readall/users', (req, res) => {
                 let docs = querySnapshot.docs;
                 for (let doc of docs) {
                     const selectedItem = {
-                        user_id: doc.user_id,
+                        user_id: doc.data().user_id,
                         user_email: doc.data().user_email,
                         user_img: doc.data().user_img,
                         user_nome: doc.data().user_nome,
@@ -192,7 +198,7 @@ app.get('/api/readall/posts', (req, res) => {
                 let docs = querySnapshot.docs;
                 for (let doc of docs) {
                     const selectedItem = {
-                        post_id: doc.post_id,
+                        post_id: doc.data().post_id,
                         genero_prato: doc.data().genero_prato,
                         mode_preparo: doc.data().mode_preparo,
                         nivel_dificuldade: doc.data().nivel_dificuldade,
