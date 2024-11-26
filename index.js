@@ -5,8 +5,6 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const app = express();
-const nodemailer = require('nodemailer');
-const mailgun = require('nodemailer-mailgun-transport');
 app.use(cors({ origin: true }));
 require('dotenv').config();
 
@@ -342,13 +340,6 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
     })();
 });
 
-// Configuração do transporte de e-mail (usando seu serviço de e-mail)
-const transporter = nodemailer.createTransport(mailgun({
-    auth: {
-        api_key: process.env.MAILGUN_API_KEY, // Sua chave de API do Mailgun
-        domain: process.env.MAILGUN_DOMAIN,   // O domínio associado à sua conta Mailgun
-    }
-}));
     
     // Rota para redefinir a senha (qualquer usuário pode chamar)
     app.post('/api/reset-password', async (req, res) => {
