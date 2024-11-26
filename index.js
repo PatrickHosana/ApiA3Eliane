@@ -89,7 +89,36 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Outras rotas (não mudaram)
+// Criar Usuário
+app.post('/api/create/users', async (req, res) => {
+    const { user_email, user_nome, user_senha, user_img } = req.body;
+
+    if (!user_email || !user_nome || !user_senha) {
+        console.log('Campos obrigatórios não fornecidos');
+        return res.status(400).json({ message: 'Campos obrigatórios não fornecidos.' });
+    }
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(user_senha, salt);
+
+        const newUser = {
+            user_email,
+            user_nome,
+            user_senha: hashedPassword,
+            user_img: user_img || null,
+        };
+
+        const docRef = await db.collection('users').add(newUser);
+        console.log('Usuário criado com sucesso');
+        return res.status(201).json({ message: 'Usuário criado com sucesso', user_id: docRef.id });
+    } catch (error) {
+        console.error('Erro ao criar usuário:', error);
+        return res.status(500).json({ message: 'Erro ao criar usuário', error: error.message });
+    }
+});
+
+// Ler usuário específico
 app.get('/api/readitem/users/:user_id', (req, res) => {
     (async () => {
         try {
@@ -104,7 +133,7 @@ app.get('/api/readitem/users/:user_id', (req, res) => {
     })();
 });
 
-// Ler todos os usuarios
+// Ler todos os usuários
 app.get('/api/readall/users', (req, res) => {
     (async () => {
         try {
@@ -131,7 +160,7 @@ app.get('/api/readall/users', (req, res) => {
     })();
 });
 
-// Update
+// Update Usuário
 app.put('/api/update/users/:user_id', (req, res) => {
     (async () => {
         try {
@@ -150,7 +179,7 @@ app.put('/api/update/users/:user_id', (req, res) => {
     })();
 });
 
-// Delete usuarios
+// Delete Usuário
 app.delete('/api/delete/users/:user_id', (req, res) => {
     (async () => {
         try {
@@ -164,14 +193,128 @@ app.delete('/api/delete/users/:user_id', (req, res) => {
     })();
 });
 
-// Outras rotas para posts (sem mudanças)
+// Criar Post
 app.post('/api/create/posts', (req, res) => {
-    // ... Código para criar posts
+    (async () => {
+        try {
+            const requiredFields = [
+                'nome_prato',
+                'genero_prato',
+                'mode_preparo',
+                'nivel_dificuldade',
+                'nome_ingredientes',
+                'quantidade_porcao',
+                'tempo_preparo',
+            ];
+
+            for (const field of requiredFields) {
+                if (!req.body[field]) {
+                    return res.status(400).json({ error: `Campo obrigatório '${field}' não foi fornecido.` });
+                }
+            }
+
+            const data = {
+                nome_prato: req.body.nome_prato,
+                genero_prato: req.body.genero_prato,
+                mode_preparo: req.body.mode_preparo,
+                nivel_dificuldade: req.body.nivel_dificuldade,
+                nome_ingredientes: req.body.nome_ingredientes,
+                quantidade_porcao: req.body.quantidade_porcao,
+                tempo_preparo: req.body.tempo_preparo,
+                img_post: req.body.img_post || null,
+            };
+
+            await db.collection('posts').doc('/' + req.body.post_id + '/').create(data);
+
+            return res.status(200).json({ message: 'Post criado com sucesso!' });
+        } catch (error) {
+            console.error('Erro ao criar post:', error);
+            return res.status(500).json({ error: 'Erro ao salvar os dados no banco.' });
+        }
+    })();
 });
 
+// Ler post específico
 app.get('/api/readitem/posts/:post_id', (req, res) => {
-    // ... Código para ler post específico
+    (async () => {
+        try {
+            const document = db.collection('posts').doc(req.params.post_id);
+            let item = await document.get();
+            let response = item.data();
+            return res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
 });
 
-// etc.
+// Ler todos os posts
+app.get('/api/readall/posts', (req, res) => {
+    (async () => {
+        try {
+            let query = db.collection('posts');
+            let response = [];
+            await query.get().then(querySnapshot => {
+                let docs = querySnapshot.docs;
+                for (let doc of docs) {
+                    const selectedItem = {
+                        post_id: doc.data().post_id,
+                        nome_prato: doc.data().nome_prato,
+                        genero_prato: doc.data().genero_prato,
+                        mode_preparo: doc.data().mode_preparo,
+                        nivel_dificuldade: doc.data().nivel_dificuldade,
+                        nome_ingredientes: doc.data().nome_ingredientes,
+                        quantidade_porcao: doc.data().quantidade_porcao,
+                        tempo_preparo: doc.data().tempo_preparo,
+                        img_post: doc.data().img_post,
+                    };
+                    response.push(selectedItem);
+                }
+            });
+            return res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
+});
+
+// Update Post
+app.put('/api/update/posts/:post_id', (req, res) => {
+    (async () => {
+        try {
+            const document = db.collection('posts').doc(req.params.post_id);
+            await document.update({
+                nome_prato: req.body.nome_prato,
+                genero_prato: req.body.genero_prato,
+                mode_preparo: req.body.mode_preparo,
+                nivel_dificuldade: req.body.nivel_dificuldade,
+                nome_ingredientes: req.body.nome_ingredientes,
+                quantidade_porcao: req.body.quantidade_porcao,
+                tempo_preparo: req.body.tempo_preparo,
+            });
+            return res.status(200).send();
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
+});
+
+// Delete Post
+app.delete('/api/delete/posts/:post_id', (req, res) => {
+    (async () => {
+        try {
+            const document = db.collection('posts').doc(req.params.post_id);
+            await document.delete();
+            return res.status(200).send();
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
+});
+
+// Iniciar o servidor
 app.listen(3030, () => console.log("Server Rodando"));
