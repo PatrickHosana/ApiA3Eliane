@@ -315,6 +315,27 @@ app.delete('/api/delete/posts/:post_id', (req, res) => {
         }
     })();
 });
+// Forgot Password
+app.post('/api/forgot-password', async (req, res) => {
+    const { user_email } = req.body;
+
+    if (!user_email) {
+        return res.status(400).json({ message: 'Email não fornecido.' });
+    }
+
+    try {
+        // Enviar e-mail de recuperação de senha usando o Firebase Auth
+        const auth = admin.auth();
+        await auth.generatePasswordResetLink(user_email);
+
+        // Informar ao usuário que o e-mail de recuperação foi enviado
+        return res.status(200).json({ message: 'E-mail de recuperação de senha enviado com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao enviar e-mail de recuperação de senha:', error);
+        return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
+    }
+});
+
 
 // Iniciar o servidor
 app.listen(3030, () => console.log("Server Rodando"));
