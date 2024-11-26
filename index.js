@@ -206,7 +206,7 @@ app.get('/api/readall/posts', (req, res) => {
                         nome_prato: doc.data().nome_prato,
                         quantidade_porcao: doc.data().quantidade_porcao,
                         tempo_preparo: doc.data().tempo_preparo,
-                        img_post: doc.data().post_img,
+                        img_post: doc.data().img_post,
                     };
                     response.push(selectedItem);
                 }
@@ -232,7 +232,7 @@ app.put('/api/update/posts/:post_id', (req, res) => {
                 nome_ingredientes: req.body.nome_ingredientes,
                 quantidade_porcao: req.body.quantidade_porcao,
                 tempo_preparo: req.body.tempo_preparo,
-                img_post: req.body.post_img,
+                img_post: req.body.img_post,
             });
             return res.status(200).send();
         } catch (error) {
