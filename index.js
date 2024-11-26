@@ -338,10 +338,16 @@ app.post('/api/forgot-password', async (req, res) => {
     }
 
     try {
+        // Verifique se o e-mail está registrado no Firebase Authentication
+        const userRecord = await admin.auth().getUserByEmail(user_email);
+        
+        if (!userRecord) {
+            return res.status(404).json({ message: 'E-mail não registrado.' });
+        }
+
         // Gerar link de redefinição de senha
-        const auth = admin.auth();
-        const resetLink = await auth.generatePasswordResetLink(user_email);
-    
+        const resetLink = await admin.auth().generatePasswordResetLink(user_email);
+
         // Configurar o e-mail de recuperação
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -353,19 +359,17 @@ app.post('/api/forgot-password', async (req, res) => {
                 <a href="${resetLink}">Redefinir senha</a>
             `,
         };
-    
+
         // Enviar o e-mail
         await transporter.sendMail(mailOptions);
-        console.log(`E-mail enviado para ${user_email}`); // Log para verificação
-    
+        console.log(`E-mail enviado para ${user_email}`);
+
         return res.status(200).json({ message: 'E-mail de recuperação de senha enviado com sucesso.' });
     } catch (error) {
         console.error('Erro ao enviar e-mail de recuperação de senha:', error);
         return res.status(500).json({ message: 'Erro ao enviar o e-mail de recuperação de senha.', error: error.message });
     }
-    
 });
-
 
 
 // Iniciar o servidor
